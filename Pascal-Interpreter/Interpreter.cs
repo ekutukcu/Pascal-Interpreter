@@ -42,10 +42,24 @@ namespace Pascal_Interpreter
 
             current_char = Text[Pos];
 
+            
             if(Char.IsDigit(current_char))
             {
-                Pos++;
-                return new Token(TokenType.INTEGER, current_char.ToString());
+                string tmpStr="";
+
+                while (Char.IsDigit(current_char))
+                {
+                    tmpStr += current_char.ToString();
+                    Pos++;
+                    Console.WriteLine(Pos);
+
+                    if (Pos < Text.Length)
+                        current_char = Text[Pos];
+                    else
+                        break;
+                }
+                //Pos++;
+                return new Token(TokenType.INTEGER, tmpStr);
             } else if(current_char=='+')
             {
                 Pos++;
@@ -60,6 +74,7 @@ namespace Pascal_Interpreter
             
             if(CurrentToken.Type == NextTokenType)
             {
+                
                 CurrentToken = GetNextToken();
             } else
             {
