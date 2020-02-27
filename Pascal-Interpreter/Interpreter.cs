@@ -1,17 +1,21 @@
 ﻿using System;
+using System.Text.RegularExpressions;
+
 namespace Pascal_Interpreter
 {
-    public enum TokenType { INTEGER, PLUS, EOF}
+    public enum TokenType { INTEGER, OPERATOR, EOF}
 
     public class Interpreter
     {
         private readonly string Text;
         private int Pos;
         private Token CurrentToken;
+        
 
         public Interpreter(string Text)
         {
-            this.Text = Text;
+            //this.Text = Text;
+            this.Text = Regex.Replace(Text, @"\s+", "");
             Pos = 0;
         }
 
@@ -23,14 +27,30 @@ namespace Pascal_Interpreter
             Eat(TokenType.INTEGER);
 
             var Op = CurrentToken;
-            Eat(TokenType.PLUS);
+            Eat(TokenType.OPERATOR);
 
             var Right = CurrentToken;
             Eat(TokenType.INTEGER);
 
-            
-            return Int32.Parse(Left.Value) + Int32.Parse(Right.Value);
+            return EvalOperator(int.Parse(Left.Value), int.Parse(Right.Value), Op);
+            //return Int32.Parse(Left.Value) + Int32.Parse(Right.Value);
 
+        }
+
+        private int EvalOperator(int Left, int Right, Token Op)
+        {
+            switch(Op.Value)
+            {
+                case "+":
+                    return Left + Right;
+                case "-":
+                    return Left - Right;
+                case "/":
+                    return (int)Left / Right;
+                case "*":
+                    return Left * Right;
+            }
+            throw new Exception("Error parsing input");
         }
 
         public Token GetNextToken()
@@ -60,10 +80,10 @@ namespace Pascal_Interpreter
                 }
                 //Pos++;
                 return new Token(TokenType.INTEGER, tmpStr);
-            } else if(current_char=='+')
+            } else if("+-*/".Contains(current_char))
             {
                 Pos++;
-                return new Token(TokenType.PLUS, current_char.ToString());
+                return new Token(TokenType.OPERATOR, current_char.ToString());
             }
 
             throw new Exception("Error parsing input");
