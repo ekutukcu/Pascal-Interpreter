@@ -108,5 +108,24 @@ namespace Unit_Tests
             Assert.Equal(1232, intp.Expr());
 
         }
+
+        [Fact]
+        public void TestMultipleTerms ()
+        {
+            var intp = new Interpreter("5+ 5-10");
+            Assert.Equal(0, intp.Expr());
+
+            intp = new Interpreter("   0 -12+15 +10 -2 -2");
+            Assert.Equal(9, intp.Expr());
+
+            intp = new Interpreter("100 -  30-100");
+            Assert.Equal(-30, intp.Expr());
+
+            intp = new Interpreter("                   1+ 12327+10");
+            Assert.Equal(12338, intp.Expr());
+
+        }
+
+
     }
 }

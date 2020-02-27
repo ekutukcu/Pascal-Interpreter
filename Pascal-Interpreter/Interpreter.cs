@@ -21,18 +21,26 @@ namespace Pascal_Interpreter
 
         public int Expr()
         {
+            int result=0;
             CurrentToken = GetNextToken();
 
             var Left = CurrentToken;
             Eat(TokenType.INTEGER);
 
-            var Op = CurrentToken;
-            Eat(TokenType.OPERATOR);
+            result = int.Parse(Left.Value);
 
-            var Right = CurrentToken;
-            Eat(TokenType.INTEGER);
+            while (CurrentToken.Type!=TokenType.EOF)
+            {
+                var Op = CurrentToken;
+                Eat(TokenType.OPERATOR);
 
-            return EvalOperator(int.Parse(Left.Value), int.Parse(Right.Value), Op);
+                var Right = CurrentToken;
+                Eat(TokenType.INTEGER);
+
+                result =EvalOperator(result, int.Parse(Right.Value), Op);
+            }
+
+            return result;
             //return Int32.Parse(Left.Value) + Int32.Parse(Right.Value);
 
         }
