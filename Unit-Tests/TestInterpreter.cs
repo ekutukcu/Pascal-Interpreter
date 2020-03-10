@@ -39,5 +39,22 @@ namespace Unit_Tests
             Assert.Equal(12327, intp.Expr());
 
         }
+
+        [Fact]
+        public void TestWhitespace()
+        {
+            var intp = new Interpreter(" 51+ 5");
+            Assert.Equal(56, intp.Expr());
+
+            intp = new Interpreter("4 +2 ");
+            Assert.Equal(6, intp.Expr());
+
+            intp = new Interpreter("          10 +30    ");
+            Assert.Equal(40, intp.Expr());
+
+            intp = new Interpreter("    12327 + 0");
+            Assert.Equal(12327, intp.Expr());
+
+        }
     }
 }

@@ -33,40 +33,60 @@ namespace Pascal_Interpreter
 
         }
 
+        private void SkipWhitespace()
+        {
+            if (Pos >= Text.Length)
+            {
+                return;
+            }
+            char CurrentChar = Text[Pos];
+            while (char.IsWhiteSpace(CurrentChar) && Pos< Text.Length)
+            {
+                CurrentChar = Text[Pos];
+
+                Pos++;
+
+            }
+        }
+
         public Token GetNextToken()
         {
-            char current_char;
+            char CurrentChar;
+
+            SkipWhitespace();
 
             if (Pos >= Text.Length)
                 return new Token(TokenType.EOF, null);
 
-            current_char = Text[Pos];
-
             
-            if(Char.IsDigit(current_char))
+
+            CurrentChar = Text[Pos];
+
+
+            if(Char.IsDigit(CurrentChar))
             {
                 string tmpStr="";
 
-                while (Char.IsDigit(current_char))
+                while (Char.IsDigit(CurrentChar))
                 {
-                    tmpStr += current_char.ToString();
+                    tmpStr += CurrentChar.ToString();
                     Pos++;
                     Console.WriteLine(Pos);
 
                     if (Pos < Text.Length)
-                        current_char = Text[Pos];
+                        CurrentChar = Text[Pos];
                     else
                         break;
                 }
                 //Pos++;
                 return new Token(TokenType.INTEGER, tmpStr);
-            } else if(current_char=='+')
+            } else if(CurrentChar=='+')
             {
                 Pos++;
-                return new Token(TokenType.PLUS, current_char.ToString());
+                return new Token(TokenType.PLUS, CurrentChar.ToString());
             }
 
-            throw new Exception("Error parsing input");
+            throw new Exception("Error parsing input: " + (int)(CurrentChar));
         }
 
         private void Eat(TokenType NextTokenType)
@@ -78,7 +98,7 @@ namespace Pascal_Interpreter
                 CurrentToken = GetNextToken();
             } else
             {
-                throw new Exception("Token not recognised.");
+                throw new Exception("Token not recognised. Expected {0} but got {1}.");
             }
         }
 
