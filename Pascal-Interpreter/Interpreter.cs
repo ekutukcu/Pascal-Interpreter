@@ -3,110 +3,154 @@ using System.Text.RegularExpressions;
 
 namespace Pascal_Interpreter
 {
-    public enum TokenType { INTEGER, OPERATOR, EOF}
+    public enum TokenType { INTEGER, TIMES, DIVIDE, ADD, SUBTRACT, OPERATOR, EOF}
 
     public class Interpreter
     {
         private readonly string Text;
         private int Pos;
         private Token CurrentToken;
+        private char CurrentChar;
         
 
         public Interpreter(string Text)
         {
-            //this.Text = Text;
-            this.Text = Regex.Replace(Text, @"\s+", "");
+            this.Text = Text;
             Pos = 0;
+            CurrentChar = Text[Pos];
+            CurrentToken = GetNextToken();
+            
         }
 
         public int Expr()
         {
-            int result=0;
-            CurrentToken = GetNextToken();
+            int result = Term();
 
-            var Left = CurrentToken;
-            Eat(TokenType.INTEGER);
-
-            result = int.Parse(Left.Value);
-
-            while (CurrentToken.Type!=TokenType.EOF)
+            while(CurrentToken.Type!=TokenType.EOF)
             {
-                var Op = CurrentToken;
-                Eat(TokenType.OPERATOR);
-
-                var Right = CurrentToken;
-                Eat(TokenType.INTEGER);
-
-                result =EvalOperator(result, int.Parse(Right.Value), Op);
+                if(CurrentToken.Type==TokenType.ADD)
+                {
+                    Eat(TokenType.ADD);
+                    result += Term();
+                } else if(CurrentToken.Type == TokenType.SUBTRACT) {
+                    Eat(TokenType.SUBTRACT);
+                    result -= Term();
+                }
             }
-
             return result;
-            //return Int32.Parse(Left.Value) + Int32.Parse(Right.Value);
 
         }
 
-        private int EvalOperator(int Left, int Right, Token Op)
+        public int Term()
         {
-            switch(Op.Value)
+            int result = Factor();
+
+            while (CurrentToken.Type != TokenType.EOF)
             {
-                case "+":
-                    return Left + Right;
-                case "-":
-                    return Left - Right;
-                case "/":
-                    return (int)Left / Right;
-                case "*":
-                    return Left * Right;
+                if(CurrentToken.Type==TokenType.TIMES)
+                {
+                    Eat(TokenType.TIMES);
+                    result *= Factor();
+                } else if(CurrentToken.Type == TokenType.DIVIDE)
+                {
+                    Eat(TokenType.DIVIDE);
+                    result /= Factor();
+                } else
+                {
+                    break;
+                }
             }
-            throw new Exception("Error parsing input");
+            return result;
         }
+
+        public int Factor()
+        {
+            var token = CurrentToken;
+            Eat(TokenType.INTEGER);
+            return int.Parse(token.Value);
+        }
+
+        public int Integer()
+        {
+            string res = "";
+            while(Char.IsDigit(CurrentChar))
+            {
+                res += CurrentChar;
+                Advance();
+            }
+            return int.Parse(res);
+        }
+
+        private void Advance()
+        {
+            Pos++;
+            if(Pos>=Text.Length)
+            {
+                CurrentChar = '\0';
+            } else
+            {
+                CurrentChar = Text[Pos];
+            }
+        }
+        
 
         public Token GetNextToken()
         {
-            char current_char;
-
-            if (Pos >= Text.Length)
-                return new Token(TokenType.EOF, null);
-
-            current_char = Text[Pos];
-
-            
-            if(Char.IsDigit(current_char))
+            while (CurrentChar!='\0')
             {
-                string tmpStr="";
 
-                while (Char.IsDigit(current_char))
+                if("\n\t ".Contains(CurrentChar))
                 {
-                    tmpStr += current_char.ToString();
-                    Pos++;
-                    Console.WriteLine(Pos);
-
-                    if (Pos < Text.Length)
-                        current_char = Text[Pos];
-                    else
-                        break;
+                    Advance();
+                    continue;
                 }
-                //Pos++;
-                return new Token(TokenType.INTEGER, tmpStr);
-            } else if("+-*/".Contains(current_char))
-            {
-                Pos++;
-                return new Token(TokenType.OPERATOR, current_char.ToString());
+
+                if(Char.IsDigit(CurrentChar))
+                {
+                    return new Token(TokenType.INTEGER, Integer().ToString());
+                }
+
+                if (CurrentChar == '*')
+                {
+                    Advance();
+                    return new Token(TokenType.TIMES, "*");
+                }
+
+                if (CurrentChar == '/')
+                {
+                    Advance();
+                    return new Token(TokenType.DIVIDE, "/");
+                }
+
+                if (CurrentChar == '+')
+                {
+                    Advance();
+                    return new Token(TokenType.ADD, "+");
+                }
+
+                if (CurrentChar == '-')
+                {
+                    Advance();
+                    return new Token(TokenType.SUBTRACT, "-");
+                }
+
+                throw new Exception("Error parsing input");
+
             }
 
-            throw new Exception("Error parsing input");
+            return new Token(TokenType.EOF, "\0");
+
         }
 
         private void Eat(TokenType NextTokenType)
         {
-            
             if(CurrentToken.Type == NextTokenType)
             {
                 
                 CurrentToken = GetNextToken();
             } else
             {
-                throw new Exception("Token not recognised.");
+                throw new Exception(String.Format("Token not recognised. Expected: {0} but got: {1}",NextTokenType,CurrentToken.Type));
             }
         }
 
