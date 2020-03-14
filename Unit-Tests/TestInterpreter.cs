@@ -124,6 +124,34 @@ namespace Unit_Tests
             intp = new Interpreter("                   1+ 12327+10");
             Assert.Equal(12338, intp.Expr());
 
+            intp = new Interpreter("14 + 2 * 3 - 6 / 2");
+            Assert.Equal(17, intp.Expr());
+        }
+
+        [Fact]
+        public void TestBracketsAddition()
+        {
+            var intp = new Interpreter("5+ (5-10)");
+            Assert.Equal(0, intp.Expr());
+
+            intp = new Interpreter("   0 -(12+15) +10 -2 -2");
+            Assert.Equal(-21, intp.Expr());
+
+            intp = new Interpreter("100 -  (30-100)");
+            Assert.Equal(170, intp.Expr());
+
+            intp = new Interpreter("                   1+ 12327+10");
+            Assert.Equal(12338, intp.Expr());
+
+            intp = new Interpreter("14 + 2 * (3 - 6 ) / 2");
+            Assert.Equal(11, intp.Expr());
+        }
+
+        [Fact]
+        public void TestBracketsMultipleAddition()
+        {
+            var intp = new Interpreter("34+(2*(3+5))");
+            Assert.Equal(50, intp.Expr());
         }
 
 

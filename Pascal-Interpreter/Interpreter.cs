@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Pascal_Interpreter
 {
-    public enum TokenType { INTEGER, TIMES, DIVIDE, ADD, SUBTRACT, OPERATOR, EOF}
+    public enum TokenType { INTEGER, TIMES, DIVIDE, ADD, SUBTRACT, OPERATOR, BRACKET, EOF}
 
     public class Interpreter
     {
@@ -26,7 +26,7 @@ namespace Pascal_Interpreter
         {
             int result = Term();
 
-            while(CurrentToken.Type!=TokenType.EOF)
+            while(CurrentToken.Type!=TokenType.EOF && CurrentToken.Type != TokenType.BRACKET)
             {
                 if(CurrentToken.Type==TokenType.ADD)
                 {
@@ -66,8 +66,24 @@ namespace Pascal_Interpreter
         public int Factor()
         {
             var token = CurrentToken;
-            Eat(TokenType.INTEGER);
-            return int.Parse(token.Value);
+            if (CurrentToken.Type == TokenType.BRACKET)
+            {
+                return Bracket();
+            } else
+            {
+                Eat(TokenType.INTEGER);
+                return int.Parse(token.Value);
+            }
+        }
+
+        public int Bracket()
+        {
+            int result = 0;
+            var token = CurrentToken;
+            Eat(TokenType.BRACKET);
+            result= Expr();
+            Eat(TokenType.BRACKET);
+            return result;
         }
 
         public int Integer()
@@ -132,6 +148,12 @@ namespace Pascal_Interpreter
                 {
                     Advance();
                     return new Token(TokenType.SUBTRACT, "-");
+                }
+
+                if (CurrentChar=='(' || CurrentChar==')')
+                {
+                    Advance();
+                    return new Token(TokenType.BRACKET, CurrentChar.ToString());
                 }
 
                 throw new Exception("Error parsing input");
