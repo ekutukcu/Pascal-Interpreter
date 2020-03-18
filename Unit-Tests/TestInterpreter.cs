@@ -9,16 +9,20 @@ namespace Unit_Tests
         [Fact]
         public void TestSingleDigitAddition()
         {
-            var intp = new Interpreter("5+5");
+            var lexer = new Lexer("5+5");
+            var intp = new Interpreter(lexer);
             Assert.Equal(10, intp.Expr());
 
-            intp = new Interpreter("4+2");
+            lexer = new Lexer("4+2");
+            intp = new Interpreter(lexer);
             Assert.Equal(6, intp.Expr());
 
-            intp = new Interpreter("1+0");
+            lexer = new Lexer("1+0");
+            intp = new Interpreter(lexer);
             Assert.Equal(1, intp.Expr());
 
-            intp = new Interpreter("7+8");
+            lexer = new Lexer("7+8");
+            intp = new Interpreter(lexer);
             Assert.Equal(15, intp.Expr());
 
         }
@@ -26,16 +30,22 @@ namespace Unit_Tests
         [Fact]
         public void TestMultiDigitAddition()
         {
-            var intp = new Interpreter("51+5");
+            var lexer = new Lexer("51+5");
+
+            var intp = new Interpreter(lexer);
             Assert.Equal(56, intp.Expr());
 
-            intp = new Interpreter("4+2");
+            lexer = new Lexer("4+2");
+
+            intp = new Interpreter(lexer);
             Assert.Equal(6, intp.Expr());
 
-            intp = new Interpreter("10+30");
+            lexer = new Lexer("10+30");
+            intp = new Interpreter(lexer);
             Assert.Equal(40, intp.Expr());
 
-            intp = new Interpreter("12327+0");
+            lexer = new Lexer("12327+0");
+            intp = new Interpreter(lexer);
             Assert.Equal(12327, intp.Expr());
 
         }
@@ -43,16 +53,20 @@ namespace Unit_Tests
         [Fact]
         public void TestAdditionWithWhitespace()
         {
-            var intp = new Interpreter("5+  5");
+            var lexer = new Lexer("5+  5");
+            var intp = new Interpreter(lexer);
             Assert.Equal(10, intp.Expr());
 
-            intp = new Interpreter("   0 +12 ");
+            lexer = new Lexer("   0 +12 ");
+            intp = new Interpreter(lexer);
             Assert.Equal(12, intp.Expr());
 
-            intp = new Interpreter("10 +  30");
+            lexer = new Lexer("10 +  30");
+            intp = new Interpreter(lexer);
             Assert.Equal(40, intp.Expr());
 
-            intp = new Interpreter("                    12327+0");
+            lexer = new Lexer("                    12327+0");
+            intp = new Interpreter(lexer);
             Assert.Equal(12327, intp.Expr());
 
         }
@@ -60,16 +74,20 @@ namespace Unit_Tests
         [Fact]
         public void TestSubtraction()
         {
-            var intp = new Interpreter("5- 5");
+            var lexer = new Lexer("5- 5");
+            var intp = new Interpreter(lexer);
             Assert.Equal(0, intp.Expr());
 
-            intp = new Interpreter("   0 -12 ");
+            lexer = new Lexer("   0 -12 ");
+            intp = new Interpreter(lexer);
             Assert.Equal(-12, intp.Expr());
 
-            intp = new Interpreter("100 -  30");
+            lexer = new Lexer("100 -  30");
+            intp = new Interpreter(lexer);
             Assert.Equal(70, intp.Expr());
 
-            intp = new Interpreter("                    12327-0");
+            lexer = new Lexer("                    12327-0");
+            intp = new Interpreter(lexer);
             Assert.Equal(12327, intp.Expr());
 
         }
@@ -77,16 +95,20 @@ namespace Unit_Tests
         [Fact]
         public void TestMultiplication()
         {
-            var intp = new Interpreter("5* 5");
+            var lexer = new Lexer("5* 5");
+            var intp = new Interpreter(lexer);
             Assert.Equal(25, intp.Expr());
 
-            intp = new Interpreter("   0 *12 ");
+            lexer = new Lexer("   0 *12 ");
+            intp = new Interpreter(lexer);
             Assert.Equal(0, intp.Expr());
 
-            intp = new Interpreter("100 *  30");
+            lexer = new Lexer("100 *  30");
+            intp = new Interpreter(lexer);
             Assert.Equal(3000, intp.Expr());
 
-            intp = new Interpreter("                    12327*10");
+            lexer = new Lexer("                    12327*10");
+            intp = new Interpreter(lexer);
             Assert.Equal(123270, intp.Expr());
 
         }
@@ -95,16 +117,20 @@ namespace Unit_Tests
         [Fact]
         public void TestDivision()
         {
-            var intp = new Interpreter("5/ 5");
+            var lexer = new Lexer("5/ 5");
+            var intp = new Interpreter(lexer);
             Assert.Equal(1, intp.Expr());
 
-            intp = new Interpreter("   0 /12 ");
+            lexer = new Lexer("   0 /12 ");
+            intp = new Interpreter(lexer);
             Assert.Equal(0, intp.Expr());
 
-            intp = new Interpreter("100 /  30");
+            lexer = new Lexer("100 /  30");
+            intp = new Interpreter(lexer);
             Assert.Equal(3, intp.Expr());
 
-            intp = new Interpreter("                    12327/10");
+            lexer = new Lexer("                    12327/10");
+            intp = new Interpreter(lexer);
             Assert.Equal(1232, intp.Expr());
 
         }
@@ -112,45 +138,56 @@ namespace Unit_Tests
         [Fact]
         public void TestMultipleTerms ()
         {
-            var intp = new Interpreter("5+ 5-10");
+            var lexer = new Lexer("5+ 5-10");
+            var intp = new Interpreter(lexer);
             Assert.Equal(0, intp.Expr());
 
-            intp = new Interpreter("   0 -12+15 +10 -2 -2");
+            lexer = new Lexer("   0 -12+15 +10 -2 -2");
+            intp = new Interpreter(lexer);
             Assert.Equal(9, intp.Expr());
 
-            intp = new Interpreter("100 -  30-100");
+            lexer = new Lexer("100 -  30-100");
+            intp = new Interpreter(lexer);
             Assert.Equal(-30, intp.Expr());
 
-            intp = new Interpreter("                   1+ 12327+10");
+            lexer = new Lexer("                   1+ 12327+10");
+            intp = new Interpreter(lexer);
             Assert.Equal(12338, intp.Expr());
 
-            intp = new Interpreter("14 + 2 * 3 - 6 / 2");
+            lexer = new Lexer("14 + 2 * 3 - 6 / 2");
+            intp = new Interpreter(lexer);
             Assert.Equal(17, intp.Expr());
         }
 
         [Fact]
         public void TestBracketsAddition()
         {
-            var intp = new Interpreter("5+ (5-10)");
+            var lexer = new Lexer("5+ (5-10)");
+            var intp = new Interpreter(lexer);
             Assert.Equal(0, intp.Expr());
 
-            intp = new Interpreter("   0 -(12+15) +10 -2 -2");
+            lexer = new Lexer("   0 -(12+15) +10 -2 -2");
+            intp = new Interpreter(lexer);
             Assert.Equal(-21, intp.Expr());
 
-            intp = new Interpreter("100 -  (30-100)");
+            lexer = new Lexer("100 -  (30-100)");
+            intp = new Interpreter(lexer);
             Assert.Equal(170, intp.Expr());
 
-            intp = new Interpreter("                   1+ 12327+10");
+            lexer = new Lexer("                   1+ 12327+10");
+            intp = new Interpreter(lexer);
             Assert.Equal(12338, intp.Expr());
 
-            intp = new Interpreter("14 + 2 * (3 - 6 ) / 2");
+            lexer = new Lexer("14 + 2 * (3 - 6 ) / 2");
+            intp = new Interpreter(lexer);
             Assert.Equal(11, intp.Expr());
         }
 
         [Fact]
         public void TestBracketsMultipleAddition()
         {
-            var intp = new Interpreter("34+(2*(3+5))");
+            var lexer = new Lexer("34+(2*(3+5))");
+            var intp = new Interpreter(lexer);
             Assert.Equal(50, intp.Expr());
         }
 

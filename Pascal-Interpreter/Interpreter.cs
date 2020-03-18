@@ -7,19 +7,15 @@ namespace Pascal_Interpreter
 
     public class Interpreter
     {
-        private readonly string Text;
-        private int Pos;
         private Token CurrentToken;
-        private char CurrentChar;
-        
+        private Lexer MyLexer;
 
-        public Interpreter(string Text)
+        public Interpreter(Lexer LexerParm)
         {
-            this.Text = Text;
-            Pos = 0;
-            CurrentChar = Text[Pos];
-            CurrentToken = GetNextToken();
-            
+            this.MyLexer = LexerParm;
+            CurrentToken = MyLexer.GetNextToken();
+
+
         }
 
         public int Expr()
@@ -86,10 +82,55 @@ namespace Pascal_Interpreter
             return result;
         }
 
+        private void Eat(TokenType NextTokenType)
+        {
+            if(CurrentToken.Type == NextTokenType)
+            {
+                
+                CurrentToken = MyLexer.GetNextToken();
+            } else
+            {
+                throw new Exception(String.Format("Token not recognised. Expected: {0} but got: {1}",NextTokenType,CurrentToken.Type));
+            }
+        }
+
+    }
+
+    public class Token
+    {
+        public TokenType Type { get; set; }
+        public string Value { get; set; }
+
+        public Token(TokenType Type, string Value)
+        {
+            this.Type = Type;
+            this.Value = Value;
+        }
+
+        public override string ToString() {
+            return String.Format("Token({0},{1})", Type, Value);
+        }
+    }
+
+    public class Lexer
+    {
+
+        private char CurrentChar;
+        private int Pos;
+
+        private readonly string Text;
+
+        public Lexer(string Text)
+        {
+            this.Text = Text;
+            Pos = 0;
+            CurrentChar = Text[Pos];
+        }
+
         public int Integer()
         {
             string res = "";
-            while(Char.IsDigit(CurrentChar))
+            while (Char.IsDigit(CurrentChar))
             {
                 res += CurrentChar;
                 Advance();
@@ -97,31 +138,18 @@ namespace Pascal_Interpreter
             return int.Parse(res);
         }
 
-        private void Advance()
-        {
-            Pos++;
-            if(Pos>=Text.Length)
-            {
-                CurrentChar = '\0';
-            } else
-            {
-                CurrentChar = Text[Pos];
-            }
-        }
-        
-
         public Token GetNextToken()
         {
-            while (CurrentChar!='\0')
+            while (CurrentChar != '\0')
             {
 
-                if("\n\t ".Contains(CurrentChar))
+                if ("\n\t ".Contains(CurrentChar))
                 {
                     Advance();
                     continue;
                 }
 
-                if(Char.IsDigit(CurrentChar))
+                if (Char.IsDigit(CurrentChar))
                 {
                     return new Token(TokenType.INTEGER, Integer().ToString());
                 }
@@ -150,7 +178,7 @@ namespace Pascal_Interpreter
                     return new Token(TokenType.SUBTRACT, "-");
                 }
 
-                if (CurrentChar=='(' || CurrentChar==')')
+                if (CurrentChar == '(' || CurrentChar == ')')
                 {
                     Advance();
                     return new Token(TokenType.BRACKET, CurrentChar.ToString());
@@ -164,34 +192,17 @@ namespace Pascal_Interpreter
 
         }
 
-        private void Eat(TokenType NextTokenType)
+        private void Advance()
         {
-            if(CurrentToken.Type == NextTokenType)
+            Pos++;
+            if (Pos >= Text.Length)
             {
-                
-                CurrentToken = GetNextToken();
-            } else
+                CurrentChar = '\0';
+            }
+            else
             {
-                throw new Exception(String.Format("Token not recognised. Expected: {0} but got: {1}",NextTokenType,CurrentToken.Type));
+                CurrentChar = Text[Pos];
             }
         }
-
     }
-
-    public class Token
-    {
-        public TokenType Type { get; set; }
-        public string Value { get; set; }
-
-        public Token(TokenType Type, string Value)
-        {
-            this.Type = Type;
-            this.Value = Value;
-        }
-
-        public override string ToString() {
-            return String.Format("Token({0},{1})", Type, Value);
-        }
-    }
-
 }
