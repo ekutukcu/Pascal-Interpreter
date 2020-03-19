@@ -5,94 +5,189 @@ namespace Pascal_Interpreter
 {
     public enum TokenType { INTEGER, TIMES, DIVIDE, ADD, SUBTRACT, OPERATOR, BRACKET, EOF}
 
-    public class Interpreter
+    public class ASTNode
     {
-        private Token CurrentToken;
-        private Lexer MyLexer;
 
-        public Interpreter(Lexer LexerParm)
+    }
+
+    public class BinaryOperator: ASTNode
+    {
+        public ASTNode Left;
+        public ASTNode Right;
+        public Token Op;
+
+        public BinaryOperator(ASTNode Left, Token Op, ASTNode Right)
         {
-            this.MyLexer = LexerParm;
+            this.Left = Left;
+            this.Right = Right;
+            this.Op = Op;
+        }
+    }
+
+    public class Num: ASTNode
+    {
+        public Token Value;
+
+
+        public Num(Token Value)
+        {
+            this.Value = Value;
+        }
+    }
+
+    public class Parser
+    {
+        private Lexer MyLexer;
+        private Token CurrentToken;
+
+        public Parser(Lexer LexerParm)
+        {
+            MyLexer = LexerParm;
             CurrentToken = MyLexer.GetNextToken();
-
-
         }
 
-        public int Expr()
+        public ASTNode Expr()
         {
-            int result = Term();
-
-            while(CurrentToken.Type!=TokenType.EOF && CurrentToken.Type != TokenType.BRACKET)
+            ASTNode result = Term();
+            Token token;
+            while (CurrentToken.Type != TokenType.EOF && CurrentToken.Type != TokenType.BRACKET)
             {
-                if(CurrentToken.Type==TokenType.ADD)
+                token = CurrentToken;
+                if (CurrentToken.Type == TokenType.ADD)
                 {
                     Eat(TokenType.ADD);
-                    result += Term();
-                } else if(CurrentToken.Type == TokenType.SUBTRACT) {
-                    Eat(TokenType.SUBTRACT);
-                    result -= Term();
+                    
                 }
+                else if (CurrentToken.Type == TokenType.SUBTRACT)
+                {
+                    Eat(TokenType.SUBTRACT);
+                   
+                }
+                result = new BinaryOperator(result, token, Term());
             }
             return result;
 
         }
 
-        public int Term()
+        public ASTNode Term()
         {
-            int result = Factor();
-
+            ASTNode result = Factor();
+            Token token;
             while (CurrentToken.Type != TokenType.EOF)
             {
-                if(CurrentToken.Type==TokenType.TIMES)
+                token = CurrentToken;
+                if (CurrentToken.Type == TokenType.TIMES)
                 {
                     Eat(TokenType.TIMES);
-                    result *= Factor();
-                } else if(CurrentToken.Type == TokenType.DIVIDE)
+                    
+                }
+                else if (CurrentToken.Type == TokenType.DIVIDE)
                 {
                     Eat(TokenType.DIVIDE);
-                    result /= Factor();
-                } else
+                    
+                }
+                else
                 {
                     break;
                 }
+                result = new BinaryOperator(result, token, Factor());
             }
             return result;
         }
 
-        public int Factor()
+        public ASTNode Factor()
         {
             var token = CurrentToken;
             if (CurrentToken.Type == TokenType.BRACKET)
             {
                 return Bracket();
-            } else
+            }
+            else
             {
                 Eat(TokenType.INTEGER);
-                return int.Parse(token.Value);
+                return new Num(token);
             }
         }
 
-        public int Bracket()
+        public ASTNode Bracket()
         {
-            int result = 0;
+            ASTNode result;
             var token = CurrentToken;
             Eat(TokenType.BRACKET);
-            result= Expr();
+            result = Expr();
             Eat(TokenType.BRACKET);
             return result;
         }
 
         private void Eat(TokenType NextTokenType)
         {
-            if(CurrentToken.Type == NextTokenType)
+            if (CurrentToken.Type == NextTokenType)
             {
-                
+
                 CurrentToken = MyLexer.GetNextToken();
-            } else
+            }
+            else
             {
-                throw new Exception(String.Format("Token not recognised. Expected: {0} but got: {1}",NextTokenType,CurrentToken.Type));
+                throw new Exception(String.Format("Token not recognised. Expected: {0} but got: {1}", NextTokenType, CurrentToken.Type));
             }
         }
+
+        public ASTNode Parse()
+        {
+            return Expr();
+        }
+    }
+
+
+    public class Interpreter
+    {
+        private Token CurrentToken;
+        private Parser ParserParm;
+
+        public Interpreter(Parser ParserParm)
+        {
+            this.ParserParm = ParserParm;
+
+        }
+        
+        public int Traverse(ASTNode Node)
+        {
+            if(Node.GetType().Name=="Num")
+            {
+                return int.Parse((Node as Num).Value.Value);
+            } else if (Node.GetType().Name == "BinaryOperator")
+            {
+                int result = 0;
+                var TmpNode = Node as BinaryOperator;
+                switch (TmpNode.Op.Type)
+                {
+                    case TokenType.ADD:
+                        result= Traverse(TmpNode.Left) + Traverse(TmpNode.Right);
+                        break;
+                    case TokenType.SUBTRACT:
+                        result = Traverse(TmpNode.Left) - Traverse(TmpNode.Right);
+                        break;
+                    case TokenType.TIMES:
+                        result = Traverse(TmpNode.Left) * Traverse(TmpNode.Right);
+                        break;
+                    case TokenType.DIVIDE:
+                        result = Traverse(TmpNode.Left) / Traverse(TmpNode.Right);
+                        break;
+                }
+
+                return result;
+            } else
+            {
+                throw new Exception("Runtime error");
+            }
+        }
+
+        public int Interpret()
+        {
+            var tree = ParserParm.Parse();
+            return Traverse(tree);
+        }
+        
 
     }
 

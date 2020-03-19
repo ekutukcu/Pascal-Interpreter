@@ -9,107 +9,48 @@ namespace Unit_Tests
         [Fact]
         public void TestSingleDigitAddition()
         {
-            var lexer = new Lexer("5+5");
-            var intp = new Interpreter(lexer);
-            Assert.Equal(10, intp.Expr());
-
-            lexer = new Lexer("4+2");
-            intp = new Interpreter(lexer);
-            Assert.Equal(6, intp.Expr());
-
-            lexer = new Lexer("1+0");
-            intp = new Interpreter(lexer);
-            Assert.Equal(1, intp.Expr());
-
-            lexer = new Lexer("7+8");
-            intp = new Interpreter(lexer);
-            Assert.Equal(15, intp.Expr());
-
+            Assert.Equal(10, InterpretExpression("5+5"));
+            Assert.Equal(6, InterpretExpression("4+2"));
+            Assert.Equal(1, InterpretExpression("1+0"));
+            Assert.Equal(15, InterpretExpression("7+8"));
         }
-
+        
         [Fact]
         public void TestMultiDigitAddition()
         {
-            var lexer = new Lexer("51+5");
 
-            var intp = new Interpreter(lexer);
-            Assert.Equal(56, intp.Expr());
-
-            lexer = new Lexer("4+2");
-
-            intp = new Interpreter(lexer);
-            Assert.Equal(6, intp.Expr());
-
-            lexer = new Lexer("10+30");
-            intp = new Interpreter(lexer);
-            Assert.Equal(40, intp.Expr());
-
-            lexer = new Lexer("12327+0");
-            intp = new Interpreter(lexer);
-            Assert.Equal(12327, intp.Expr());
-
+            Assert.Equal(56, InterpretExpression("51+5"));
+            Assert.Equal(40, InterpretExpression("10+30"));
+            Assert.Equal(6, InterpretExpression("4+2"));
+            Assert.Equal(12327, InterpretExpression("12327+0"));
         }
 
         [Fact]
         public void TestAdditionWithWhitespace()
         {
-            var lexer = new Lexer("5+  5");
-            var intp = new Interpreter(lexer);
-            Assert.Equal(10, intp.Expr());
-
-            lexer = new Lexer("   0 +12 ");
-            intp = new Interpreter(lexer);
-            Assert.Equal(12, intp.Expr());
-
-            lexer = new Lexer("10 +  30");
-            intp = new Interpreter(lexer);
-            Assert.Equal(40, intp.Expr());
-
-            lexer = new Lexer("                    12327+0");
-            intp = new Interpreter(lexer);
-            Assert.Equal(12327, intp.Expr());
-
+            Assert.Equal(10, InterpretExpression("5+   5"));
+            Assert.Equal(12, InterpretExpression("  0+ 12"));
+            Assert.Equal(40, InterpretExpression("10   +   30"));
+            Assert.Equal(12327, InterpretExpression("               12327+0"));
         }
 
         [Fact]
         public void TestSubtraction()
         {
-            var lexer = new Lexer("5- 5");
-            var intp = new Interpreter(lexer);
-            Assert.Equal(0, intp.Expr());
-
-            lexer = new Lexer("   0 -12 ");
-            intp = new Interpreter(lexer);
-            Assert.Equal(-12, intp.Expr());
-
-            lexer = new Lexer("100 -  30");
-            intp = new Interpreter(lexer);
-            Assert.Equal(70, intp.Expr());
-
-            lexer = new Lexer("                    12327-0");
-            intp = new Interpreter(lexer);
-            Assert.Equal(12327, intp.Expr());
-
+            Assert.Equal(0, InterpretExpression("5- 5"));
+            Assert.Equal(-12, InterpretExpression("    0-  12"));
+            Assert.Equal(70, InterpretExpression("100 -     30"));
+            Assert.Equal(12327, InterpretExpression("         12327-  0"));
         }
 
         [Fact]
         public void TestMultiplication()
-        {
-            var lexer = new Lexer("5* 5");
-            var intp = new Interpreter(lexer);
-            Assert.Equal(25, intp.Expr());
+        { 
 
-            lexer = new Lexer("   0 *12 ");
-            intp = new Interpreter(lexer);
-            Assert.Equal(0, intp.Expr());
-
-            lexer = new Lexer("100 *  30");
-            intp = new Interpreter(lexer);
-            Assert.Equal(3000, intp.Expr());
-
-            lexer = new Lexer("                    12327*10");
-            intp = new Interpreter(lexer);
-            Assert.Equal(123270, intp.Expr());
+            Assert.Equal(25, InterpretExpression("5* 5"));
+            Assert.Equal(0, InterpretExpression("    0*12"));
+            Assert.Equal(3000, InterpretExpression("100 *   30"));
+            Assert.Equal(123270, InterpretExpression("   12327*10"));
 
         }
 
@@ -117,80 +58,45 @@ namespace Unit_Tests
         [Fact]
         public void TestDivision()
         {
-            var lexer = new Lexer("5/ 5");
-            var intp = new Interpreter(lexer);
-            Assert.Equal(1, intp.Expr());
-
-            lexer = new Lexer("   0 /12 ");
-            intp = new Interpreter(lexer);
-            Assert.Equal(0, intp.Expr());
-
-            lexer = new Lexer("100 /  30");
-            intp = new Interpreter(lexer);
-            Assert.Equal(3, intp.Expr());
-
-            lexer = new Lexer("                    12327/10");
-            intp = new Interpreter(lexer);
-            Assert.Equal(1232, intp.Expr());
-
+            Assert.Equal(1, InterpretExpression("5/ 5"));
+            Assert.Equal(0, InterpretExpression("   0/12"));
+            Assert.Equal(3, InterpretExpression("100  / 30"));
+            Assert.Equal(1232, InterpretExpression("        12327/10"));
         }
 
         [Fact]
         public void TestMultipleTerms ()
         {
-            var lexer = new Lexer("5+ 5-10");
-            var intp = new Interpreter(lexer);
-            Assert.Equal(0, intp.Expr());
-
-            lexer = new Lexer("   0 -12+15 +10 -2 -2");
-            intp = new Interpreter(lexer);
-            Assert.Equal(9, intp.Expr());
-
-            lexer = new Lexer("100 -  30-100");
-            intp = new Interpreter(lexer);
-            Assert.Equal(-30, intp.Expr());
-
-            lexer = new Lexer("                   1+ 12327+10");
-            intp = new Interpreter(lexer);
-            Assert.Equal(12338, intp.Expr());
-
-            lexer = new Lexer("14 + 2 * 3 - 6 / 2");
-            intp = new Interpreter(lexer);
-            Assert.Equal(17, intp.Expr());
+            Assert.Equal(0, InterpretExpression("5+ 5-10"));
+            Assert.Equal(9, InterpretExpression("   0 -12+15 +10 -2 -2"));
+            Assert.Equal(-30, InterpretExpression("100 -  30-100"));
+            Assert.Equal(12338, InterpretExpression("                   1+ 12327+10"));
+            Assert.Equal(17, InterpretExpression("14 + 2 * 3 - 6 / 2"));
         }
-
+        
         [Fact]
         public void TestBracketsAddition()
         {
-            var lexer = new Lexer("5+ (5-10)");
-            var intp = new Interpreter(lexer);
-            Assert.Equal(0, intp.Expr());
+            Assert.Equal(-21, InterpretExpression("   0 -(12+15) +10 -2 -2"));
+            Assert.Equal(0, InterpretExpression("5+ (5-10)"));
+            Assert.Equal(170, InterpretExpression("100 - (30 - 100)"));
+            Assert.Equal(11, InterpretExpression("14 + 2 * (3 - 6 ) / 2"));
 
-            lexer = new Lexer("   0 -(12+15) +10 -2 -2");
-            intp = new Interpreter(lexer);
-            Assert.Equal(-21, intp.Expr());
-
-            lexer = new Lexer("100 -  (30-100)");
-            intp = new Interpreter(lexer);
-            Assert.Equal(170, intp.Expr());
-
-            lexer = new Lexer("                   1+ 12327+10");
-            intp = new Interpreter(lexer);
-            Assert.Equal(12338, intp.Expr());
-
-            lexer = new Lexer("14 + 2 * (3 - 6 ) / 2");
-            intp = new Interpreter(lexer);
-            Assert.Equal(11, intp.Expr());
         }
-
+        
         [Fact]
         public void TestBracketsMultipleAddition()
         {
-            var lexer = new Lexer("34+(2*(3+5))");
-            var intp = new Interpreter(lexer);
-            Assert.Equal(50, intp.Expr());
+            Assert.Equal(50, InterpretExpression("34 +(2*(3+5))"));
         }
-
+        
+        private int InterpretExpression(string Expression)
+        {
+            var lexer = new Lexer(Expression);
+            var parser = new Parser(lexer);
+            var intp = new Interpreter(parser);
+            return intp.Interpret();
+        }
 
     }
 }
