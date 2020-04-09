@@ -83,11 +83,29 @@ namespace Unit_Tests
             Assert.Equal(11, InterpretExpression("14 + 2 * (3 - 6 ) / 2"));
 
         }
-        
+        [Fact]
+        public void Interpret_MismatchedBrackets_Error()
+        {
+            Assert.Throws<Exception>(()=>InterpretExpression("34 +(2*(3+5(("));
+        }
         [Fact]
         public void TestBracketsMultipleAddition()
         {
             Assert.Equal(50, InterpretExpression("34 +(2*(3+5))"));
+        }
+
+        [Fact]
+        public void Interpret_SingleUnary_OutputEqualInput()
+        {
+            Assert.Equal(-50, InterpretExpression("-50"));
+            Assert.Equal(-1, InterpretExpression("-1"));
+            Assert.Equal(0, InterpretExpression("-0"));
+        }
+
+        [Fact]
+        public void Interpret_MultipleTermsWithUnary_ReturnCorrectResult()
+        {
+            Assert.Equal(5, InterpretExpression("5--5+---5"));
         }
         
         private int InterpretExpression(string Expression)
