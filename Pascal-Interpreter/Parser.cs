@@ -70,13 +70,15 @@ namespace Pascal_Interpreter
                 return Bracket();
             } else if(CurrentToken.Type == TokenType.ADD)
             {
+                
                 Eat(TokenType.ADD);
-                return Factor();
+                return new UnaryOperator(Factor(),token);
             }
             else if (CurrentToken.Type == TokenType.SUBTRACT)
             {
                 Eat(TokenType.SUBTRACT);
-                return Factor();
+                return new UnaryOperator(Factor(), token);
+
             }
             else
             {

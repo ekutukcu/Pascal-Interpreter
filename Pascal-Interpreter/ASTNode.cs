@@ -19,6 +19,18 @@
         }
     }
 
+    public class UnaryOperator:ASTNode
+    {
+        public ASTNode Node;
+        public Token Op;
+
+        public UnaryOperator(ASTNode node, Token op)
+        {
+            Node = node;
+            Op = op;
+        }
+    }
+
     public class Num : ASTNode
     {
         public Token Value;
