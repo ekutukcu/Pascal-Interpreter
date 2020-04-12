@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pascal_Interpreter
 {
@@ -13,9 +14,9 @@ namespace Pascal_Interpreter
             CurrentToken = MyLexer.GetNextToken();
         }
 
-        public ASTNode Expr()
+        private NumericalNode Expr()
         {
-            ASTNode result = Term();
+            NumericalNode result = Term();
             Token token;
             while (CurrentToken.Type == TokenType.ADD || CurrentToken.Type == TokenType.SUBTRACT)
             {
@@ -36,9 +37,9 @@ namespace Pascal_Interpreter
 
         }
 
-        public ASTNode Term()
+        private NumericalNode Term()
         {
-            ASTNode result = Factor();
+            NumericalNode result = Factor();
             Token token;
             while (CurrentToken.Type != TokenType.EOF)
             {
@@ -62,23 +63,98 @@ namespace Pascal_Interpreter
             return result;
         }
 
-        public ASTNode Factor()
+        private ASTNode EmptyStatement()
+        {
+            return new EmptyStatement();
+        }
+
+        private ASTNode Variable()
+        {
+            var token = CurrentToken;
+            Eat(TokenType.ID);
+            return new Variable(token); ;
+
+        }
+
+        private ASTNode Assignment()
+        {
+            var left= Variable();
+            Eat(TokenType.ASSIGN);
+            var right = Expr() as NumericalNode;
+            return new Assignment(left,new Token(TokenType.ASSIGN,":="),right);
+            
+
+        }
+
+        private ASTNode Statement()
+        {
+            switch(CurrentToken.Type)
+            {
+                case TokenType.BEGIN:
+                    return CompoundStatement();
+                case TokenType.ID:
+                    return Assignment();
+                case TokenType.END:
+                    return EmptyStatement();
+            }
+            throw new Exception("Could not parse statement");
+        }
+
+        private List<ASTNode> StatementList()
+        {
+            var output = new List<ASTNode>();
+
+            output.Add(Statement());
+            while (CurrentToken.Type == TokenType.SEMI)
+            {
+                Eat(TokenType.SEMI);
+                output.Add(Statement());
+                    
+            }
+
+            return output;
+
+        }
+
+        private CompoundStatement CompoundStatement()
+        {
+            Eat(TokenType.BEGIN);
+            var outputList=StatementList();
+            Eat(TokenType.END);
+            return new CompoundStatement(outputList);
+
+        }
+
+        private ASTNode Program()
+        {
+
+            var output=CompoundStatement();
+            Eat(TokenType.DOT);
+            return output;
+
+        }
+
+        private NumericalNode Factor()
         {
             var token = CurrentToken;
             if (CurrentToken.Type == TokenType.LBRACKET)
             {
                 return Bracket();
-            } else if(CurrentToken.Type == TokenType.ADD)
+            }
+            else if (CurrentToken.Type == TokenType.ADD)
             {
-                
                 Eat(TokenType.ADD);
-                return new UnaryOperator(Factor(),token);
+                return new UnaryOperator(Factor(), token);
             }
             else if (CurrentToken.Type == TokenType.SUBTRACT)
             {
                 Eat(TokenType.SUBTRACT);
                 return new UnaryOperator(Factor(), token);
-
+            }
+            else if (CurrentToken.Type == TokenType.ID)
+            {
+                Eat(TokenType.ID);
+                return new Variable(token);
             }
             else
             {
@@ -87,9 +163,9 @@ namespace Pascal_Interpreter
             }
         }
 
-        public ASTNode Bracket()
+        private NumericalNode Bracket()
         {
-            ASTNode result;
+            NumericalNode result;
             var token = CurrentToken;
             Eat(TokenType.LBRACKET);
             result = Expr();
@@ -112,7 +188,7 @@ namespace Pascal_Interpreter
 
         public ASTNode Parse()
         {
-            return Expr();
+            return Program();
         }
     }
 }

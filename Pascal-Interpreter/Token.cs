@@ -2,7 +2,23 @@
 
 namespace Pascal_Interpreter
 {
-    public enum TokenType { INTEGER, TIMES, DIVIDE, ADD, SUBTRACT, OPERATOR, BRACKET,LBRACKET,RBRACKET, EOF }
+    public enum TokenType {
+        INTEGER,
+        TIMES,
+        DIVIDE,
+        ADD,
+        SUBTRACT,
+        OPERATOR,
+        LBRACKET,
+        RBRACKET,
+        BEGIN,
+        END,
+        ASSIGN,
+        SEMI,
+        ID,
+        DOT,
+        EOF
+    }
 
     public class Token
     {

@@ -17,7 +17,7 @@ namespace Pascal_Interpreter
             CurrentChar = Text[Pos];
         }
 
-        public int Integer()
+        private int Integer()
         {
             string res = "";
             while (Char.IsDigit(CurrentChar))
@@ -28,10 +28,35 @@ namespace Pascal_Interpreter
             return int.Parse(res);
         }
 
+        private Token Id()
+        {
+            string idStr = "";
+            while (Char.IsLetterOrDigit(CurrentChar))
+            {
+                idStr += CurrentChar;
+                Advance();
+
+            }
+            switch(idStr)
+            {
+                case "BEGIN":
+                    return new Token(TokenType.BEGIN, idStr);
+                case "END":
+                    return new Token(TokenType.END, idStr);
+                default:
+                    return new Token(TokenType.ID, idStr);
+            }
+
+        }
+
         public Token GetNextToken()
         {
             while (CurrentChar != '\0')
             {
+                if(Char.IsLetter(CurrentChar))
+                {
+                    return Id();
+                }
 
                 if ("\n\t ".Contains(CurrentChar))
                 {
@@ -44,43 +69,47 @@ namespace Pascal_Interpreter
                     return new Token(TokenType.INTEGER, Integer().ToString());
                 }
 
-                if (CurrentChar == '*')
+                switch(CurrentChar)
                 {
-                    Advance();
-                    return new Token(TokenType.TIMES, "*");
-                }
+                    case ':':
+                        Advance();
+                        if (CurrentChar == '=')
+                        {
+                            Advance();
+                            return new Token(TokenType.ASSIGN, ":=");
+                        } else
+                        {
+                            throw new Exception("Error parsing input");
 
-                if (CurrentChar == '/')
-                {
-                    Advance();
-                    return new Token(TokenType.DIVIDE, "/");
-                }
+                        }
+                    case '*':
+                        Advance();
+                        return new Token(TokenType.TIMES, "*");
+                    case '/':
+                        Advance();
+                        return new Token(TokenType.DIVIDE, "/");
+                    case '+':
+                        Advance();
+                        return new Token(TokenType.ADD, "+");
+                    case '-':
+                        Advance();
+                        return new Token(TokenType.SUBTRACT, "-");
+                    case '(':
+                        Advance();
+                        return new Token(TokenType.LBRACKET, CurrentChar.ToString());
+                    case ')':
+                        Advance();
+                        return new Token(TokenType.RBRACKET, CurrentChar.ToString());
+                    case '.':
+                        Advance();
+                        return new Token(TokenType.DOT, CurrentChar.ToString());
+                    case ';':
+                        Advance();
+                        return new Token(TokenType.SEMI, CurrentChar.ToString());
+                    default:
+                        throw new Exception("Error parsing input");
 
-                if (CurrentChar == '+')
-                {
-                    Advance();
-                    return new Token(TokenType.ADD, "+");
                 }
-
-                if (CurrentChar == '-')
-                {
-                    Advance();
-                    return new Token(TokenType.SUBTRACT, "-");
-                }
-
-
-
-                if (CurrentChar == '(')
-                {
-                    Advance();
-                    return new Token(TokenType.LBRACKET, CurrentChar.ToString());
-                }
-                if (CurrentChar == ')')
-                {
-                    Advance();
-                    return new Token(TokenType.RBRACKET, CurrentChar.ToString());
-                }
-                throw new Exception("Error parsing input");
 
             }
 
