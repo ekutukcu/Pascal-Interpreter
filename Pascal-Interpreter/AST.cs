@@ -7,6 +7,52 @@ namespace Pascal_Interpreter
 
 
     }
+    //Program, Block, VarDecl, Type
+
+    public class Program:ASTNode
+    {
+        public string Name;
+        public Block ExecutionBlock;
+        public Program(string name, Block block)
+        {
+            Name = name;
+            this.ExecutionBlock = block;
+        }
+    }
+
+    public class Block:ASTNode
+    {
+        public List<VariableDeclaration> Declarations;
+        public CompoundStatement Statement;
+
+        public Block(List<VariableDeclaration> declarations, CompoundStatement compoundStatement)
+        {
+            Declarations = declarations;
+            Statement = compoundStatement;
+        }
+    }
+
+    public class VariableDeclaration:ASTNode
+    {
+        public Type TypeNode;
+        public Variable VarNode;
+        public VariableDeclaration(Type typeNode, Variable varNode)
+        {
+            TypeNode = typeNode;
+            VarNode = varNode;
+        }
+    }
+
+    public class Type:ASTNode
+    {
+        public Token value;
+
+        public Type(Token token)
+        {
+            value = token;
+        }
+
+    }
 
     public class NumericalNode:ASTNode
     {

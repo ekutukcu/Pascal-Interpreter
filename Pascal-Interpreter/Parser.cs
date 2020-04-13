@@ -49,10 +49,13 @@ namespace Pascal_Interpreter
                     Eat(TokenType.TIMES);
                     
                 }
-                else if (CurrentToken.Type == TokenType.DIVIDE)
+                else if (CurrentToken.Type == TokenType.INTEGER_DIV)
                 {
-                    Eat(TokenType.DIVIDE);
+                    Eat(TokenType.INTEGER_DIV);
                     
+                } else if(CurrentToken.Type==TokenType.FLOAT_DIV)
+                {
+                    Eat(TokenType.FLOAT_DIV);
                 }
                 else
                 {
@@ -127,10 +130,73 @@ namespace Pascal_Interpreter
 
         private ASTNode Program()
         {
-
-            var output=CompoundStatement();
+            Eat(TokenType.PROGRAM);
+            var name = CurrentToken;
+            Eat(TokenType.ID);
+            Eat(TokenType.SEMI);
+            var block =new Block(VariableDeclarations(), CompoundStatement());
+            var output=new Program(name.Value,block);
             Eat(TokenType.DOT);
             return output;
+
+        }
+
+        private List<VariableDeclaration> VariableDeclarations()
+        {
+            
+            var varDecls = new List<VariableDeclaration>();
+            if(CurrentToken.Type==TokenType.VAR)
+            {
+                Eat(TokenType.VAR);
+                while (CurrentToken.Type == TokenType.ID)
+                {
+                    varDecls.AddRange(VarDecl());
+                    Eat(TokenType.SEMI);
+                }
+            }
+
+
+            return varDecls;
+
+        }
+
+        private List<VariableDeclaration> VarDecl()
+        {
+            var varDecls = new List<VariableDeclaration>();
+            var varNodes = new List<Variable>();
+
+
+            Variable varNode = new Variable(CurrentToken);
+            Eat(TokenType.ID);
+            varNodes.Add(varNode);
+
+            while (CurrentToken.Type == TokenType.COMMA)
+            {
+                Eat(TokenType.COMMA);
+                varNode = new Variable(CurrentToken);
+                varNodes.Add(varNode);
+                Eat(TokenType.ID);
+            }
+
+            Eat(TokenType.COLON);
+            var typeSpec = TypeSpec();
+            foreach (var node in varNodes)
+            {
+                varDecls.Add(new VariableDeclaration(typeSpec, node));
+            }
+
+            return varDecls;
+        }
+
+        private Type TypeSpec()
+        {
+            var token = CurrentToken;
+            if (CurrentToken.Type == TokenType.INTEGER)
+                Eat(TokenType.INTEGER);
+            else
+                Eat(TokenType.REAL);
+
+            return new Type(token);
 
         }
 
@@ -156,10 +222,19 @@ namespace Pascal_Interpreter
                 Eat(TokenType.ID);
                 return new Variable(token);
             }
+            else if (CurrentToken.Type == TokenType.INTEGER_CONST)
+            {
+                Eat(TokenType.INTEGER_CONST);
+                return new Num(token);
+            }
+            else if(CurrentToken.Type == TokenType.REAL_CONST)
+            {
+                Eat(TokenType.REAL_CONST);
+                return new Num(token);
+            }
             else
             {
-                Eat(TokenType.INTEGER);
-                return new Num(token);
+                throw new Exception("");
             }
         }
 

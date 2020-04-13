@@ -11,10 +11,10 @@ namespace Pascal_Interpreter
         public Interpreter(Parser ParserParm)
         {
             this.ParserParm = ParserParm;
-            this.GlobalScope = new Dictionary<string, int>();
+            this.GlobalScope = new Dictionary<string, dynamic>();
         }
 
-        public Dictionary<string,int> GlobalScope { get; set; }
+        public Dictionary<string,dynamic> GlobalScope { get; set; }
 
         public void Visit(ASTNode node)
         {
@@ -23,16 +23,40 @@ namespace Pascal_Interpreter
             visitorMethod.Invoke(this,new object[] { node });
         }
 
-        public int Visit(NumericalNode node)
+        public dynamic Visit(NumericalNode node)
         {
             var nodeName = node.GetType().Name;
             var visitorMethod = this.GetType().GetMethod("Visit" + nodeName);
-            return (int)visitorMethod.Invoke(this, new object[] { node });
+            return visitorMethod.Invoke(this, new object[] { node });
         }
 
-        public int VisitBinaryOperator(NumericalNode node)
+        public void VisitProgram(ASTNode node)
         {
-            int result = 0;
+            var program = node as Program;
+            Visit(program.ExecutionBlock);
+        }
+
+        public void VisitBlock(ASTNode node)
+        {
+            var block=node as Block;
+            foreach (var decl in block.Declarations)
+                Visit(decl);
+            Visit(block.Statement);
+        }
+
+        public void VisitVariableDeclaration(ASTNode node)
+        {
+            
+        }
+
+        public void VisitType(ASTNode node)
+        {
+            
+        }
+
+        public dynamic VisitBinaryOperator(NumericalNode node)
+        {
+            dynamic result;
             var TmpNode = node as BinaryOperator;
             switch (TmpNode.Op.Type)
             {
@@ -45,9 +69,14 @@ namespace Pascal_Interpreter
                 case TokenType.TIMES:
                     result = Visit(TmpNode.Left) * Visit(TmpNode.Right);
                     break;
-                case TokenType.DIVIDE:
+                case TokenType.INTEGER_DIV:
                     result = Visit(TmpNode.Left) / Visit(TmpNode.Right);
                     break;
+                case TokenType.FLOAT_DIV:
+                    result = Visit(TmpNode.Left) / Visit(TmpNode.Right);
+                    break;
+                default:
+                    throw new Exception("Unrecognised op");
             }
 
             return result;
@@ -83,8 +112,11 @@ namespace Pascal_Interpreter
             GlobalScope[varName.Value.Value] = Visit(assignNode.Right);
         }
 
-        public int VisitNum(NumericalNode node)
+        public dynamic VisitNum(NumericalNode node)
         {
+            var num = node as Num;
+            if (num.Value.Value.Contains('.'))
+                return float.Parse(num.Value.Value);
             return int.Parse((node as Num).Value.Value);
         }
 

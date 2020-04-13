@@ -1,9 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pascal_Interpreter
 {
     public class Lexer
     {
+        public static readonly Dictionary<string, Token> KEYWORDS = new Dictionary<string, Token>(){
+            ["PROGRAM"] = new Token(TokenType.PROGRAM, "PROGRAM"),
+            ["BEGIN"] = new Token(TokenType.BEGIN, "BEGIN"),
+            ["VAR"] = new Token(TokenType.VAR, "VAR"),
+            ["DIV"] = new Token(TokenType.INTEGER_DIV, "DIV"),
+            ["INTEGER"] = new Token(TokenType.INTEGER, "INTEGER"),
+            ["REAL"] = new Token(TokenType.REAL, "REAL"),
+            ["END"] = new Token(TokenType.END, "END")
+        };
+
 
         private char CurrentChar;
         private int Pos;
@@ -37,14 +48,62 @@ namespace Pascal_Interpreter
                 Advance();
 
             }
-            switch(idStr)
+            if(KEYWORDS.ContainsKey(idStr))
             {
-                case "BEGIN":
-                    return new Token(TokenType.BEGIN, idStr);
-                case "END":
-                    return new Token(TokenType.END, idStr);
-                default:
-                    return new Token(TokenType.ID, idStr);
+                return KEYWORDS[idStr];
+            }
+
+            return new Token(TokenType.ID, idStr);
+
+        }
+
+        private void SkipWhitespace()
+        {
+            while ("\n\t ".Contains(CurrentChar))
+            {
+                Advance();
+                
+            }
+
+        }
+
+        private void SkipComment()
+        {
+            if(CurrentChar=='{')
+            {
+                while (CurrentChar != '}')
+                {
+                    if (CurrentChar == '\0')
+                        throw new Exception("Error parsing input: comment without closing brace.");
+                   
+                    Advance();
+                }
+                Advance();
+            }
+        }
+
+        private Token Number()
+        {
+            string res = "";
+            bool passedDot = false;
+            while (Char.IsDigit(CurrentChar))
+            {
+                res += CurrentChar;
+                Advance();
+                if (CurrentChar == '.' && !passedDot)
+                {
+                    passedDot = true;
+                    res += CurrentChar;
+                    Advance();
+                }
+            }
+            if(res.Contains('.'))
+            {
+                return new Token(TokenType.REAL_CONST, res);
+            }
+            else
+            {
+                return new Token(TokenType.INTEGER_CONST, res);
             }
 
         }
@@ -52,21 +111,24 @@ namespace Pascal_Interpreter
         public Token GetNextToken()
         {
             while (CurrentChar != '\0')
-            {
+            {//fixme
+                if ("\n\t ".Contains(CurrentChar) || CurrentChar == '{')
+                {
+                    SkipWhitespace();
+                    SkipComment();
+                    continue;
+                }
+                
+
                 if(Char.IsLetter(CurrentChar))
                 {
                     return Id();
                 }
-
-                if ("\n\t ".Contains(CurrentChar))
-                {
-                    Advance();
-                    continue;
-                }
-
+                
+                
                 if (Char.IsDigit(CurrentChar))
                 {
-                    return new Token(TokenType.INTEGER, Integer().ToString());
+                    return Number();
                 }
 
                 switch(CurrentChar)
@@ -79,15 +141,14 @@ namespace Pascal_Interpreter
                             return new Token(TokenType.ASSIGN, ":=");
                         } else
                         {
-                            throw new Exception("Error parsing input");
-
+                            return new Token(TokenType.COLON, ":");
                         }
                     case '*':
                         Advance();
                         return new Token(TokenType.TIMES, "*");
                     case '/':
                         Advance();
-                        return new Token(TokenType.DIVIDE, "/");
+                        return new Token(TokenType.FLOAT_DIV, "/");
                     case '+':
                         Advance();
                         return new Token(TokenType.ADD, "+");
@@ -96,16 +157,19 @@ namespace Pascal_Interpreter
                         return new Token(TokenType.SUBTRACT, "-");
                     case '(':
                         Advance();
-                        return new Token(TokenType.LBRACKET, CurrentChar.ToString());
+                        return new Token(TokenType.LBRACKET, "(");
+                    case ',':
+                        Advance();
+                        return new Token(TokenType.COMMA, ",");
                     case ')':
                         Advance();
-                        return new Token(TokenType.RBRACKET, CurrentChar.ToString());
+                        return new Token(TokenType.RBRACKET, ")");
                     case '.':
                         Advance();
-                        return new Token(TokenType.DOT, CurrentChar.ToString());
+                        return new Token(TokenType.DOT, ".");
                     case ';':
                         Advance();
-                        return new Token(TokenType.SEMI, CurrentChar.ToString());
+                        return new Token(TokenType.SEMI, ";");
                     default:
                         throw new Exception("Error parsing input");
 

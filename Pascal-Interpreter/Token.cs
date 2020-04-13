@@ -4,8 +4,15 @@ namespace Pascal_Interpreter
 {
     public enum TokenType {
         INTEGER,
+        INTEGER_DIV,
+        INTEGER_CONST,
+        REAL_CONST,
+        VAR,
+        REAL,
+        PROGRAM,
+        COLON,
         TIMES,
-        DIVIDE,
+        FLOAT_DIV,
         ADD,
         SUBTRACT,
         OPERATOR,
@@ -15,6 +22,7 @@ namespace Pascal_Interpreter
         END,
         ASSIGN,
         SEMI,
+        COMMA,
         ID,
         DOT,
         EOF

@@ -7,65 +7,125 @@ namespace Unit_Tests
     {
 
         [Fact]
-        public void Parse_AddTwoInts_ReturnsBinaryOp()
+        public void Parse_SingleStatement_BlockHasSingleChild()
         {
-            var parser = new Parser(new Lexer("BEGIN x:=345+23 END."));
-            var output = parser.Parse() as CompoundStatement;
-            var assignment = output.Children[0] as Assignment;
-            var expr = assignment.Right as BinaryOperator;
-            Assert.Equal("23", (expr.Right as Num).Value.Value);
-            Assert.Equal("345", (expr.Left as Num).Value.Value);
+            string input= @"
+PROGRAM Part10;
+VAR
+   number     : INTEGER;
+
+BEGIN
+   number := 2
+END.";
+            var parser = new Parser(new Lexer(input));
+            var output = parser.Parse() as Program;
+            Assert.Single(output.ExecutionBlock.Declarations);
+            Assert.Single(output.ExecutionBlock.Statement.Children);
         }
 
         [Fact]
-        public void Parse_AddThreeInts_ReturnsCorrectTree()
+        public void Parse_ThreeStatements_BlockHasFourChildren()
         {
-            var parser = new Parser(new Lexer("BEGIN y:=345+23+2342 END."));
-            var output = parser.Parse() as CompoundStatement;
-            var assignment = output.Children[0] as Assignment;
-            var expr = assignment.Right as BinaryOperator;
-            Assert.Equal(typeof(BinaryOperator), expr.Left.GetType());
-            Assert.Equal("2342", (expr.Right as Num).Value.Value);
+            string input = @"
+PROGRAM Part10;
+VAR
+   number     : INTEGER;
+
+BEGIN
+   number := 2;
+   number := 3;
+   number := 4;
+END.";
+            var parser = new Parser(new Lexer(input));
+            var output = parser.Parse() as Program;
+            Assert.Single(output.ExecutionBlock.Declarations);
+            Assert.Equal(4,output.ExecutionBlock.Statement.Children.Count);
         }
         [Fact]
-        public void Parse_AddVariables_ReturnsCorrectTree()
+        public void Parse_ThreeVarDeclarations_DeclarationCountIsThree()
         {
-            var parser = new Parser(new Lexer("BEGIN x:=5; y:=345+23+x END."));
-            var output = parser.Parse() as CompoundStatement;
-            var assignment = output.Children[1] as Assignment;
-            var expr = assignment.Right as BinaryOperator;
-            Assert.Equal(typeof(BinaryOperator), expr.Left.GetType());
-            Assert.Equal("x", (expr.Right as Variable).Value.Value);
+            string input = @"
+PROGRAM Part10;
+VAR
+   number     : INTEGER;
+   number2    : INTEGER;
+   number3    : REAL;
+
+BEGIN
+   number := 2;
+   number := 3;
+   number := 4;
+END.";
+            var parser = new Parser(new Lexer(input));
+            var output = parser.Parse() as Program;
+            Assert.Equal(3, output.ExecutionBlock.Declarations.Count);
+            Assert.Equal(4, output.ExecutionBlock.Statement.Children.Count);
         }
 
         [Fact]
         public void Parse_ProgramEmptyStatement_ReturnsCompoundWith1Child()
         {
-            var parser = new Parser(new Lexer("BEGIN  END."));
-            var output = parser.Parse() as CompoundStatement;
-            Assert.Single(output.Children);
+            string input = @"
+PROGRAM Part10;
+VAR
 
-        }
-
-        [Fact]
-        public void Parse_ProgramTwoStatements_ReturnsCompoundWith2Children()
-        {
-            var parser = new Parser(new Lexer("BEGIN x:=5; y:=43 END."));
-            var output = parser.Parse() as CompoundStatement;
-            Assert.Equal(2,output.Children.Count);
-
-        }
-
-        [Fact]
-        public void Parse_ProgramTwoAssignments_Returns3Children()
-        {
-           string input="BEGIN " +
-                    "x:= 9-4; " +
-                    "y:= 40+3; " +
-                "END.";
+BEGIN
+END.";
             var parser = new Parser(new Lexer(input));
-            var output = parser.Parse() as CompoundStatement;
-            Assert.Equal(3, output.Children.Count);
+            var output = parser.Parse() as Program;
+            Assert.Empty(output.ExecutionBlock.Declarations);
+            Assert.Single(output.ExecutionBlock.Statement.Children);
+
+        }
+
+        [Fact]
+        public void Parse_ProgramWithComments_ReturnsCorrectTree()
+        {
+            string input = @"
+PROGRAM Part10;
+VAR{sdaf}
+{dsfkdjsfl;kadsfadsf}
+BEGIN {adsfklhdosif}
+END.";
+            var parser = new Parser(new Lexer(input));
+            var output = parser.Parse() as Program;
+            Assert.Empty(output.ExecutionBlock.Declarations);
+            Assert.Single(output.ExecutionBlock.Statement.Children);
+
+        }
+
+
+        [Fact]
+        public void Parse_FullProgram_ReturnsCorrectAST()
+        {
+            string program = @"
+PROGRAM Part10;
+VAR
+   number     : INTEGER;
+   a, b, c, x : INTEGER;
+   y          : REAL;
+
+BEGIN {Part10}
+   BEGIN
+      number := 2;
+      a := number;
+      b := 10 * a + 10 * number DIV 4;
+      c := a - - b
+   END;
+   x := 11;
+   y := 20 / 7 + 3.14;
+   { writeln('a = ', a); }
+   { writeln('b = ', b); }
+   { writeln('c = ', c); }
+   { writeln('number = ', number); }
+   { writeln('x = ', x); }
+   { writeln('y = ', y); }
+END.  {Part10}";
+
+            var parser = new Parser(new Lexer(program));
+            var output = parser.Parse() as Program;
+            Assert.Equal("Part10",output.Name);
+
         }
     }
 }
